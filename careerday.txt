@@ -1,0 +1,104 @@
+int pin[] = {13,12,11,10,9,8,7,6};
+long duration, distance, cm;
+int status;
+int timedelay;
+
+#include <NewPing.h>
+
+#define PING_PIN  4 // Arduino pin tied to both trigger and echo pins
+#define MAX_DISTANCE 200 // Maximum distance we want to ping for (in cm)
+                         //  Maximum sensor distance is rated at 400-500cm.
+
+NewPing sonar(PING_PIN, PING_PIN, MAX_DISTANCE); // NewPing setup of
+pin and maximum distance.
+
+void setup()
+{
+  for (int i=0; i<8; i++) pinMode(pin[i],OUTPUT);
+  Serial.begin(9600);
+  timedelay=300;
+  pinMode(3,OUTPUT);
+  digitalWrite(3,LOW);
+}
+
+void loop()
+{
+                            clear();
+
+                            getdistance();
+                            Serial.println(distance);
+                            if (distance == 0) {
+                                                  clear();
+                                                  digitalWrite(3,LOW);
+                                                  Serial.println("off!!");
+                            }
+                            if (distance > 0  && distance < 60) {
+
+digitalWrite(3,HIGH);
+
+
+Serial.println("on");
+                                                                   light();
+                                                                }
+
+                            if (distance > 60 && distance < 140) {
+
+digitalWrite(3,LOW);
+
+Serial.println("off!!!!");
+                                                                   timedelay=50;
+                                                                   pickrandom();
+
+Serial.println("80 and 140");
+                                                                  }
+                            if (distance > 140) {
+                                                   digitalWrite(3,LOW);
+                                                   Serial.println("off!!!!!");
+                                                   timedelay=100;
+
+Serial.println("greater 140");
+                                                   pickrandom();
+                            }
+
+                           delay(timedelay);
+
+}
+
+void clear()
+{
+  for (int i=0; i<8; i++) {
+                            digitalWrite(pin[i],LOW);
+                             }
+
+}
+
+void light()
+{
+  for (int i=0; i<8; i++) {
+                            digitalWrite(pin[i],HIGH);
+                             }
+
+}
+
+void getdistance() {
+
+  delay(100);                      // Wait 50ms between pings
+  unsigned int uS = sonar.ping(); // get ping time in microsec
+  distance = uS / US_ROUNDTRIP_CM;
+
+}
+
+long microsecondsToInches(long microseconds)
+{
+  // According to Parallax's datasheet for the PING))), there are
+  // 73.746 microseconds per inch (i.e. sound travels at 1130 feet per
+  // second).  This gives the distance travelled by the ping, outbound
+  // and return, so we divide by 2 to get the distance of the obstacle.
+  // See: http://www.parallax.com/dl/docs/prod/acc/28015-PING-v1.3.pdf
+  return microseconds / 74 / 2;
+}
+
+void pickrandom()
+{
+  digitalWrite(pin[random(1,8)],HIGH);
+}
